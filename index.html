@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MeshKid | KidSafe Social Network</title>
+    <title>MeshKid | The Safe Neighborhood Network</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@400;900&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -11,7 +11,7 @@
         body { font-family: 'Outfit', sans-serif; background-color: #050505; color: #fff; overflow-x: hidden; }
         .mono { font-family: 'Space Mono', monospace; }
         
-        /* Device Container Scaling for Mobile */
+        /* --- DEVICE STYLES --- */
         .sidekick-frame { 
             transition: background 1.2s ease-in-out;
             background: linear-gradient(145deg, #7c2d12, #431407);
@@ -23,7 +23,6 @@
             transform-origin: top center;
         }
 
-        /* Scale down on small screens to prevent overflow */
         @media (max-width: 640px) {
             .sidekick-frame { transform: scale(0.9); margin-top: -20px; }
         }
@@ -39,7 +38,7 @@
             background: var(--lcd-off); 
             transition: background 0.15s ease-in;
             color: var(--lcd-dark); 
-            height: 400px; /* Reduced for better mobile fit */
+            height: 400px;
             display: flex;
             flex-direction: column;
             padding: 20px;
@@ -66,14 +65,6 @@
         }
         @media (min-width: 768px) { .key { height: 60px; font-size: 1.3rem; border-radius: 12px; border-bottom-width: 6px; } }
 
-        .glass-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 24px;
-            padding: 30px;
-            height: 100%;
-        }
-
         .boot-text { 
             font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 2rem; letter-spacing: 0.2em; 
             opacity: 0; transform: scale(0.8);
@@ -81,15 +72,45 @@
         }
         @media (min-width: 768px) { .boot-text { font-size: 3rem; letter-spacing: 0.3em; } }
         .boot-visible { opacity: 1; transform: scale(1); }
+
+        /* --- WEBSITE STYLES --- */
+        .glass-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 30px;
+            height: 100%;
+            transition: transform 0.3s ease;
+        }
+        .glass-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.2); }
+
+        .compare-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 1.5rem 0; align-items: center; }
+        .compare-header { font-family: 'Orbitron', sans-serif; font-weight: 900; text-transform: uppercase; color: #555; font-size: 0.9rem; letter-spacing: 1px; }
+        .check-green { color: #10b981; font-weight: 900; }
+        .cross-red { color: #ef4444; opacity: 0.6; }
     </style>
 </head>
 <body class="p-4 md:p-12">
 
-    <div id="mesh-device" class="sidekick-frame rounded-[3rem] md:rounded-[5rem] p-4 md:p-8 mb-16 md:mb-24">
+    <header class="max-w-7xl mx-auto text-center mb-12 md:mb-20 pt-10">
+        <h1 class="text-4xl md:text-7xl font-bold tracking-tight mb-6 text-white leading-tight">
+            Let's Give Them<br>Back Their Childhood.
+        </h1>
+        <p class="text-zinc-400 text-lg md:text-2xl max-w-3xl mx-auto font-medium leading-relaxed mb-8">
+            MeshKid replaces the open internet with a private neighborhood network. <br class="hidden md:block">
+            <span class="text-emerald-400 font-bold">No Strangers. No Trackers. No Monthly Fees.</span>
+        </p>
+        <div class="flex flex-col md:flex-row justify-center gap-4 text-sm md:text-base font-bold uppercase tracking-widest text-zinc-500">
+            <span class="flex items-center justify-center gap-2"><span class="w-2 h-2 bg-emerald-500 rounded-full"></span> 100% Off-Grid</span>
+            <span class="flex items-center justify-center gap-2"><span class="w-2 h-2 bg-emerald-500 rounded-full"></span> Patent Pending PoPP</span>
+        </div>
+    </header>
+
+    <div id="mesh-device" class="sidekick-frame rounded-[3rem] md:rounded-[5rem] p-4 md:p-8 mb-24">
         <div class="device-logo uppercase">MeshKid</div>
         
         <div class="flex justify-end px-4 md:px-10 mb-4 mono text-[9px] md:text-[11px] font-bold text-zinc-500">
-            <span>U.S. PATENT PENDING</span>
+            <span>MODEL: MK-01 // PENDING</span>
         </div>
 
         <div class="flex flex-col md:flex-row gap-4 md:gap-6 mb-6 md:mb-8">
@@ -120,11 +141,11 @@
                         </div>
 
                         <div id="state-home" class="app-state hidden flex flex-col justify-center">
-                            <div class="app-title uppercase">KidSafe Apps</div>
-                            <div class="menu-btn" id="mi-mesh">1. Nearby Friends</div>
-                            <div class="menu-btn" id="mi-bonds">2. Family Chat</div>
-                            <div class="menu-btn" id="mi-snake">3. Play Snake</div>
-                            <div class="menu-btn" id="mi-chess">4. Play Chess</div>
+                            <div class="app-title uppercase">SafeZone OS v1.0</div>
+                            <div class="menu-btn" id="mi-mesh">1. My Neighborhood</div>
+                            <div class="menu-btn" id="mi-bonds">2. Best Friends</div>
+                            <div class="menu-btn" id="mi-snake">3. Snake.exe</div>
+                            <div class="menu-btn" id="mi-chess">4. Chess.net</div>
                         </div>
 
                         <div id="state-snake" class="app-state hidden flex-col">
@@ -140,6 +161,16 @@
                         <div id="state-chat" class="app-state hidden flex-col">
                             <div id="chat-header" class="app-title uppercase">Messages</div>
                             <div id="chat-display" class="flex-grow overflow-y-auto pr-1"></div>
+                        </div>
+
+                        <div id="state-wipe" class="app-state hidden flex flex-col justify-center items-center text-center">
+                            <div class="text-4xl mb-4">⚠️</div>
+                            <div class="app-title w-full text-center">PRIVACY PROTOCOL</div>
+                            <p class="font-bold text-sm mb-2">UNVERIFIED CONTACT DETECTED</p>
+                            <div class="w-full bg-[#0f380f]/20 h-4 border border-[#0f380f] mb-2">
+                                <div class="bg-[#0f380f] h-full animate-[width_2s_ease-out_forwards]" style="width: 100%"></div>
+                            </div>
+                            <p class="font-black animate-pulse">WIPING KEYS...</p>
                         </div>
                     </div>
 
@@ -166,34 +197,101 @@
         </div>
     </div>
 
-    <section id="features-section" class="max-w-6xl mx-auto px-4 md:px-6 mt-20 md:mt-40">
-        <div class="text-center mb-16 md:mb-32">
-            <h2 class="text-3xl md:text-7xl font-black uppercase tracking-tighter mb-6 md:mb-8 italic">The KidSafe Social Network</h2>
-            <p class="text-zinc-400 text-lg md:text-2xl max-w-3xl mx-auto font-medium leading-relaxed">Keeping kids safe by replacing the internet with a private network accessible only by friends you meet in person.</p>
+    <section id="features-section" class="max-w-6xl mx-auto px-4 md:px-6 mb-32">
+        <div class="text-center mb-16 md:mb-24">
+            <h2 class="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-6">How The PoPP Protocol Works</h2>
+            <p class="text-zinc-400 text-lg max-w-2xl mx-auto">Most phones connect kids to the world. We connect them to their friends. Our <span class="text-white font-bold">Proof of Physical Presence</span> system ensures digital safety mirrors real-world trust.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mb-32">
             <div class="glass-card">
-                <div class="text-4xl md:text-6xl mb-6 md:mb-8">🤜🤛</div>
-                <h3 class="text-xl md:text-2xl font-bold mb-4 uppercase italic">1. Meet to Connect</h3>
-                <p class="text-zinc-400 text-base md:text-lg leading-relaxed">Connections start face-to-face. Kids tap devices together to join networks, making it impossible for strangers to join.</p>
+                <div class="text-4xl md:text-6xl mb-6">🤜🤛</div>
+                <h3 class="text-xl md:text-2xl font-bold mb-3 uppercase text-emerald-400">1. The Handshake</h3>
+                <p class="text-zinc-400 leading-relaxed">Safety starts in person. To add a friend, kids must physically tap their devices together. <strong class="text-white">No tap = No connection.</strong> It is impossible for strangers to join the network remotely.</p>
             </div>
             
             <div class="glass-card border-emerald-500/20 bg-emerald-500/5">
-                <div class="text-4xl md:text-6xl mb-6 md:mb-8">🛡️</div>
-                <h3 class="text-xl md:text-2xl font-bold mb-4 uppercase italic">2. Secure Bonding</h3>
-                <p class="text-zinc-400 text-base md:text-lg leading-relaxed">No cloud servers. Proof of Physical Presence ensures that strangers can never "ping" or find your child.</p>
+                <div class="text-4xl md:text-6xl mb-6">📡</div>
+                <h3 class="text-xl md:text-2xl font-bold mb-3 uppercase text-emerald-400">2. Neighborhood Mesh</h3>
+                <p class="text-zinc-400 leading-relaxed">Once paired, our LoRa radio technology connects them from home to home—up to <strong class="text-white">3 miles</strong> away. They can chat and play games totally off-grid, without Wi-Fi or cellular plans.</p>
             </div>
 
             <div class="glass-card">
-                <div class="text-4xl md:text-6xl mb-6 md:mb-8">📡</div>
-                <h3 class="text-xl md:text-2xl font-bold mb-4 uppercase italic">3. Neighborhood Mesh</h3>
-                <p class="text-zinc-400 text-base md:text-lg leading-relaxed">Stay in touch across the neighborhood. If friends don't meet up, the link safely wipes itself after 7 days.</p>
+                <div class="text-4xl md:text-6xl mb-6">⏳</div>
+                <h3 class="text-xl md:text-2xl font-bold mb-3 uppercase text-emerald-400">3. The Safe Wipe</h3>
+                <p class="text-zinc-400 leading-relaxed">Real friendships are active. If kids don't meet up within <strong class="text-white">7 days</strong>, the secure link automatically wipes itself. This prevents "ghost" contacts and data hoarding.</p>
             </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-32">
+            <div>
+                <h2 class="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-6">Real Range.<br>Zero Internet.</h2>
+                <div class="space-y-6">
+                    <div class="border-l-4 border-emerald-500 pl-6">
+                        <h4 class="text-xl font-bold text-white mb-1">🏠 Home-to-Home</h4>
+                        <p class="text-zinc-400">Penetrates brick & concrete to keep kids connected from their bedrooms.</p>
+                    </div>
+                    <div class="border-l-4 border-zinc-700 pl-6">
+                        <h4 class="text-xl font-bold text-white mb-1">🌳 Neighborhood Park</h4>
+                        <p class="text-zinc-400">Up to 3 miles of coverage in residential areas.</p>
+                    </div>
+                    <div class="border-l-4 border-zinc-700 pl-6">
+                        <h4 class="text-xl font-bold text-white mb-1">🔋 2-Week Battery</h4>
+                        <p class="text-zinc-400">Always on, always ready. No daily charging required.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-zinc-900 rounded-3xl p-8 border border-white/10 aspect-square flex items-center justify-center relative overflow-hidden">
+                <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#444 1px, transparent 1px); background-size: 20px 20px;"></div>
+                <div class="w-64 h-64 border-4 border-emerald-500/30 rounded-full flex items-center justify-center relative animate-pulse">
+                    <div class="w-32 h-32 bg-emerald-500/20 rounded-full flex items-center justify-center">
+                        <div class="w-4 h-4 bg-emerald-500 rounded-full shadow-[0_0_20px_#10b981]"></div>
+                    </div>
+                    <div class="absolute -top-8 bg-black border border-emerald-500/50 px-3 py-1 rounded text-xs font-mono text-emerald-400">3 MILE RADIUS</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-zinc-900/50 rounded-[2rem] p-6 md:p-12 border border-white/5">
+            <h2 class="text-2xl md:text-4xl font-black uppercase text-center mb-10">Why Parents Choose MeshKid</h2>
+            
+            <div class="hidden md:grid grid-cols-3 gap-4 mb-4 border-b border-white/10 pb-4">
+                <div class="text-zinc-500 font-bold uppercase tracking-widest text-sm">Feature</div>
+                <div class="text-center text-zinc-500 font-bold uppercase tracking-widest text-sm">Smartphones / "Kid Phones"</div>
+                <div class="text-center text-emerald-400 font-bold uppercase tracking-widest text-sm">MeshKid Device</div>
+            </div>
+
+            <div class="compare-row">
+                <div class="font-bold">Stranger Contact</div>
+                <div class="text-center text-zinc-400 text-sm">Possible via phone number spam</div>
+                <div class="text-center check-green text-lg">IMPOSSIBLE (Hardware Blocked)</div>
+            </div>
+            <div class="compare-row">
+                <div class="font-bold">Data Privacy</div>
+                <div class="text-center text-zinc-400 text-sm">Stored on Cloud Servers</div>
+                <div class="text-center check-green text-lg">100% Local Device Storage</div>
+            </div>
+            <div class="compare-row">
+                <div class="font-bold">Monthly Cost</div>
+                <div class="text-center text-zinc-400 text-sm">$15 - $60 / Month</div>
+                <div class="text-center check-green text-lg">$0 (Free Forever)</div>
+            </div>
+            <div class="compare-row border-none">
+                <div class="font-bold">Web Browsing</div>
+                <div class="text-center text-zinc-400 text-sm">Often accessible / Filtered</div>
+                <div class="text-center check-green text-lg">No Browser. No Ads.</div>
+            </div>
+        </div>
+
+        <div class="mt-20 text-center">
+            <button class="bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xl md:text-2xl py-6 px-12 rounded-full transition-all hover:scale-105 shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)]">
+                PRE-ORDER DUO PACK ($299)
+            </button>
+            <p class="mt-4 text-zinc-500 font-mono text-xs uppercase tracking-widest">Includes 2 Devices • No Subscription Required</p>
         </div>
     </section>
 
-    <footer class="py-20 md:py-32 text-center opacity-30">
+    <footer class="py-20 md:py-32 text-center opacity-30 border-t border-white/5">
         <div class="mono text-[10px] md:text-[12px] tracking-[0.5em] md:tracking-[1em] mb-4 uppercase">PoPP Mesh Protocol 2026 | Verified Physical Presence</div>
     </footer>
 
@@ -208,18 +306,18 @@
             orange: 'linear-gradient(145deg, #7c2d12, #431407)',
             black: 'linear-gradient(145deg, #1a1a1a, #0a0a0a)',
             green: 'linear-gradient(145deg, #064e3b, #022c22)',
-            cream: 'linear-gradient(145deg, #f5f5dc, #e1e1c0)'
+            cream: 'linear-gradient(145deg, #3f3f46, #18181b)'
         };
 
         const scenario = [
-            { type: 'boot', finish: finishes.black, label: 'POWERING_ON', duration: 4500 },
-            { type: 'home', select: 'mi-mesh', finish: finishes.orange, label: 'SAFE_ZONE', duration: 2000 },
-            { type: 'chat', header: 'Nearby Friends', finish: finishes.green, label: 'Local Mesh', duration: 8500, msgs: ["SkateRat: Park at 4?", "PixelKid: Let's go!"] },
+            { type: 'boot', finish: finishes.black, label: 'POWERING_ON', duration: 4000 },
+            { type: 'home', select: 'mi-mesh', finish: finishes.orange, label: 'SAFE_ZONE', duration: 2500 },
+            { type: 'chat', header: 'Nearby Friends', finish: finishes.green, label: 'Local Mesh', duration: 8000, msgs: ["SkateRat: Park at 4?", "PixelKid: Let's go!"] },
             { type: 'home', select: 'mi-bonds', finish: finishes.cream, label: 'FAMILY_LINK', duration: 2000 },
-            { type: 'chat', header: 'Mom Bond', finish: finishes.cream, label: 'Family Chat', duration: 7000, msgs: ["Mom: Dinner's ready!", "ME: Be home in 5!"] },
+            { type: 'chat', header: 'Mom Bond', finish: finishes.cream, label: 'Family Chat', duration: 6000, msgs: ["Mom: Dinner's ready!", "ME: Omw home!"] },
             { type: 'home', select: 'mi-snake', finish: finishes.black, label: 'FUN_ZONE', duration: 2000 },
-            { type: 'snake', finish: finishes.black, label: 'Snake Game', duration: 8000 },
-            { type: 'chess', finish: finishes.black, label: 'Mesh Chess', duration: 8000 }
+            { type: 'snake', finish: finishes.black, label: 'Snake Game', duration: 7000 },
+            { type: 'wipe', finish: finishes.black, label: 'AUTO_WIPE', duration: 4000 }
         ];
 
         let step = 0;
@@ -269,6 +367,7 @@
                 lcd.classList.add('lcd-on');
                 hud.style.opacity = "1";
                 footer.style.opacity = "1";
+                
                 if (current.type === 'home') {
                     document.getElementById('state-home').classList.remove('hidden');
                     document.querySelectorAll('.menu-btn').forEach(m => m.classList.remove('menu-active'));
@@ -291,6 +390,8 @@
                         await typeWriter(msg, div);
                         await new Promise(r => setTimeout(r, 600));
                     }
+                } else if (current.type === 'wipe') {
+                    document.getElementById('state-wipe').classList.remove('hidden');
                 }
             }
             setTimeout(() => { 
@@ -300,7 +401,7 @@
         }
 
         const sCanvas = document.getElementById('game-canvas'), sCtx = sCanvas.getContext('2d');
-        const canvasSize = 200; // Smaller canvas for mobile
+        const canvasSize = 200; 
         sCanvas.width = canvasSize; sCanvas.height = canvasSize;
         let grid = 10, sCount = 0, score = 0, snake = { x: 100, y: 100, dx: grid, dy: 0, cells: [], maxCells: 4 }, apple = { x: 40, y: 40 };
         function snakeLoop() {
@@ -335,18 +436,6 @@
 
         playScenario(); 
         snakeLoop();
-
-        setTimeout(() => {
-            const scrollSpeed = 0.8; 
-            const target = document.getElementById('features-section').offsetTop;
-            function slowScroll() {
-                if (window.pageYOffset < target) {
-                    window.scrollBy(0, scrollSpeed);
-                    requestAnimationFrame(slowScroll);
-                }
-            }
-            requestAnimationFrame(slowScroll);
-        }, 60000); 
     </script>
 </body>
 </html>
