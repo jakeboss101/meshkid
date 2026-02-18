@@ -7,10 +7,27 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@400;900&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --lcd-green: #8bac0f; --lcd-dark: #0f380f; --lcd-off: #1a1c0e; }
-        body { font-family: 'Outfit', sans-serif; background-color: #050505; color: #fff; overflow-x: hidden; }
+        /* Color Screen Variables */
+        :root { 
+            --screen-bg: #111827; 
+            --screen-text: #f3f4f6; 
+            --accent-blue: #3b82f6;
+            --accent-gray: #374151;
+        }
+        body { font-family: 'Outfit', sans-serif; background-color: #050505; color: #fff; overflow-x: hidden; position: relative; }
         .mono { font-family: 'Space Mono', monospace; }
         
+        /* Mesh Background Canvas */
+        #mesh-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; 
+            pointer-events: none;
+        }
+
         /* --- DEVICE STYLES --- */
         .sidekick-frame { 
             transition: background 1.2s ease-in-out;
@@ -21,6 +38,7 @@
             max-width: 1000px;
             margin: auto;
             transform-origin: top center;
+            z-index: 10;
         }
 
         @media (max-width: 640px) {
@@ -34,28 +52,57 @@
         }
         
         .screen-bezel { border: 12px solid #000; background: #000; border-radius: 12px; }
+        
         .lcd-content { 
-            background: var(--lcd-off); 
-            transition: background 0.15s ease-in;
-            color: var(--lcd-dark); 
+            background: #000; 
+            color: var(--screen-text); 
             height: 400px;
             display: flex;
             flex-direction: column;
             padding: 20px;
             position: relative;
+            overflow: hidden;
         }
         @media (min-width: 768px) { .lcd-content { height: 520px; padding: 28px; } }
         
-        .lcd-on { background: var(--lcd-green); }
+        .lcd-on { background: var(--screen-bg); }
 
-        .app-title { font-size: 1rem; font-weight: 900; border-bottom: 3px solid var(--lcd-dark); padding-bottom: 8px; margin-bottom: 12px; }
-        .chat-text { font-size: 1.1rem; font-weight: 900; line-height: 1.3; margin-bottom: 10px; border-left: 4px solid var(--lcd-dark); padding-left: 10px; min-height: 1.5em; }
+        .app-title { font-size: 1rem; font-weight: 900; border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 12px; color: #fff; }
         
-        .cursor-active::after { content: '█'; animation: blink 0.6s infinite; margin-left: 4px; font-size: 1rem; }
+        .chat-bubble-left { 
+            background: var(--accent-gray); 
+            padding: 8px 12px; 
+            border-radius: 12px; 
+            border-bottom-left-radius: 2px;
+            margin-bottom: 8px; 
+            font-size: 0.9rem;
+            max-width: 80%;
+            align-self: flex-start;
+        }
+        .chat-bubble-right { 
+            background: var(--accent-blue); 
+            color: white;
+            padding: 8px 12px; 
+            border-radius: 12px; 
+            border-bottom-right-radius: 2px;
+            margin-bottom: 8px; 
+            font-size: 0.9rem;
+            max-width: 80%;
+            align-self: flex-end;
+        }
+        
+        .cursor-active::after { content: '|'; animation: blink 0.6s infinite; margin-left: 2px; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-        .menu-btn { border: 3px solid var(--lcd-dark); padding: 12px; margin-bottom: 8px; font-weight: 900; font-size: 1.2rem; text-align: left; }
-        .menu-active { background: var(--lcd-dark); color: var(--lcd-green); }
+        .menu-btn { 
+            border: 1px solid #333; 
+            background: rgba(255,255,255,0.05);
+            padding: 12px; margin-bottom: 8px; 
+            font-weight: 700; font-size: 1.1rem; text-align: left; 
+            border-radius: 8px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .menu-active { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
 
         .key {
             background: #1a1a1a; border-bottom: 4px solid #000; color: #888;
@@ -68,6 +115,9 @@
         .boot-text { 
             font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 2rem; letter-spacing: 0.2em; 
             opacity: 0; transform: scale(0.8);
+            background: linear-gradient(to right, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         @media (min-width: 768px) { .boot-text { font-size: 3rem; letter-spacing: 0.3em; } }
@@ -81,6 +131,7 @@
             padding: 30px;
             height: 100%;
             transition: transform 0.3s ease;
+            backdrop-filter: blur(5px);
         }
         .glass-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.2); }
 
@@ -88,16 +139,27 @@
         .compare-header { font-family: 'Orbitron', sans-serif; font-weight: 900; text-transform: uppercase; color: #555; font-size: 0.9rem; letter-spacing: 1px; }
         .check-green { color: #10b981; font-weight: 900; }
         .cross-red { color: #ef4444; opacity: 0.6; }
+
+        /* Mario specific */
+        #state-mario { image-rendering: pixelated; }
     </style>
 </head>
 <body class="p-4 md:p-12">
 
-    <header class="max-w-7xl mx-auto text-center mb-12 md:mb-20 pt-10">
-        <h1 class="text-4xl md:text-7xl font-bold tracking-tight mb-6 text-white leading-tight">
-            Let's Give Them<br>Back Their Childhood.
-        </h1>
+    <canvas id="mesh-canvas"></canvas>
+
+    <header class="max-w-7xl mx-auto text-center mb-12 md:mb-20 pt-10 relative z-10">
+        <div class="flex flex-col items-center justify-center gap-1 mb-8">
+            <span class="text-xl md:text-3xl font-bold text-zinc-400 tracking-widest uppercase">Powered by Kids</span>
+            <span class="text-xl md:text-3xl font-bold text-zinc-400 tracking-widest uppercase">Protected by</span>
+            
+            <h1 class="text-5xl md:text-7xl font-black tracking-tighter mt-2 text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-500 to-cyan-500 drop-shadow-[0_0_25px_rgba(16,185,129,0.3)]" style="font-family: 'Orbitron', sans-serif;">
+                MESHKID
+            </h1>
+        </div>
+        
         <p class="text-zinc-400 text-lg md:text-2xl max-w-3xl mx-auto font-medium leading-relaxed mb-8">
-            MeshKid replaces the open internet with a private neighborhood network. <br class="hidden md:block">
+            The device that replaces the open internet with a private neighborhood network. <br class="hidden md:block">
             <span class="text-emerald-400 font-bold">No Strangers. No Trackers. No Monthly Fees.</span>
         </p>
         <div class="flex flex-col md:flex-row justify-center gap-4 text-sm md:text-base font-bold uppercase tracking-widest text-zinc-500">
@@ -110,47 +172,49 @@
         <div class="device-logo uppercase">MeshKid</div>
         
         <div class="flex justify-end px-4 md:px-10 mb-4 mono text-[9px] md:text-[11px] font-bold text-zinc-500">
-            <span>MODEL: MK-01 // PENDING</span>
+            <span>MODEL: MK-02 Color // PENDING</span>
         </div>
 
         <div class="flex flex-col md:flex-row gap-4 md:gap-6 mb-6 md:mb-8">
             <div class="hidden md:flex flex-col justify-center">
-                <div class="w-24 h-24 bg-zinc-800 rounded-full border-8 border-zinc-900 flex items-center justify-center">
-                    <div class="w-10 h-10 border-4 border-zinc-700 rounded-sm rotate-45"></div>
+                <div class="w-24 h-24 bg-zinc-800 rounded-full border-8 border-zinc-900 flex items-center justify-center shadow-[inset_0_4px_10px_rgba(0,0,0,0.5)]">
+                    <div class="w-8 h-20 bg-black rounded flex justify-center items-center"><div class="w-6 h-6 border border-zinc-700 rounded-full"></div></div>
+                    <div class="w-20 h-8 bg-black rounded absolute flex justify-center items-center"></div>
                 </div>
             </div>
 
             <div class="screen-bezel flex-grow overflow-hidden shadow-2xl">
                 <div class="lcd-content" id="lcd-main">
-                    <div id="lcd-hud" class="flex justify-between items-start mb-4 h-8 border-b border-[#0f380f]/20 pb-2 opacity-0">
-                        <div class="flex items-center gap-2 md:gap-3">
-                            <div class="flex items-end gap-1 h-3 md:h-4">
-                                <div class="bg-[#0f380f] w-1 h-1/4"></div>
-                                <div class="bg-[#0f380f] w-1 h-2/4"></div>
-                                <div class="bg-[#0f380f] w-1 h-3/4"></div>
-                                <div class="bg-[#0f380f] w-1 h-full animate-pulse"></div>
+                    <div id="lcd-hud" class="flex justify-between items-center mb-2 h-6 border-b border-white/10 pb-1 opacity-0 z-20 relative">
+                        <div class="flex items-center gap-2">
+                            <div class="flex items-end gap-0.5 h-3">
+                                <div class="bg-white w-1 h-1/4"></div>
+                                <div class="bg-white w-1 h-2/4"></div>
+                                <div class="bg-white w-1 h-3/4"></div>
+                                <div class="bg-emerald-400 w-1 h-full"></div>
                             </div>
-                            <span class="mono text-[9px] md:text-[11px] font-black uppercase">NODE: 735</span>
+                            <span class="mono text-[10px] font-bold">MESH: ONLINE</span>
                         </div>
-                        <div id="lcd-label" class="mono text-[9px] md:text-[10px] font-black uppercase tracking-widest">SECURE</div>
+                        <div class="text-[10px] font-bold">100%</div>
                     </div>
 
-                    <div id="screen-viewport" class="flex-grow flex flex-col">
+                    <div id="screen-viewport" class="flex-grow flex flex-col relative">
                         <div id="state-boot" class="app-state active-state flex flex-col justify-center items-center h-full">
                             <div id="boot-logo" class="boot-text">MESHKID</div>
                         </div>
 
                         <div id="state-home" class="app-state hidden flex flex-col justify-center">
-                            <div class="app-title uppercase">SafeZone OS v1.0</div>
-                            <div class="menu-btn" id="mi-mesh">1. My Neighborhood</div>
-                            <div class="menu-btn" id="mi-bonds">2. Best Friends</div>
-                            <div class="menu-btn" id="mi-snake">3. Snake.exe</div>
-                            <div class="menu-btn" id="mi-chess">4. Chess.net</div>
+                            <div class="app-title uppercase text-center mb-4">SafeZone OS v2.0</div>
+                            <div class="menu-btn" id="mi-mesh"><span>📡</span> My Neighborhood</div>
+                            <div class="menu-btn" id="mi-bonds"><span>❤️</span> Best Friends</div>
+                            <div class="menu-btn" id="mi-mario"><span>🍄</span> Super Mario</div>
+                            <div class="menu-btn" id="mi-chess"><span>♟️</span> Chess.net</div>
                         </div>
 
-                        <div id="state-snake" class="app-state hidden flex-col">
-                            <div class="flex justify-between app-title"><span>SNAKE.EXE</span><span id="score">000</span></div>
-                            <div class="flex-grow flex items-center justify-center"><canvas id="game-canvas"></canvas></div>
+                        <div id="state-mario" class="app-state hidden flex-col h-full bg-[#5c94fc] rounded-lg overflow-hidden relative">
+                            <div class="absolute top-2 left-2 font-black text-white drop-shadow-md z-10 mono text-xs leading-tight">MARIO<br><span id="m-score">000000</span></div>
+                            <div class="absolute top-2 right-2 font-black text-white drop-shadow-md z-10 mono text-xs leading-tight text-right">WORLD<br>1-1</div>
+                            <canvas id="mario-canvas" class="w-full h-full object-cover"></canvas>
                         </div>
 
                         <div id="state-chess" class="app-state hidden flex-col">
@@ -158,46 +222,46 @@
                             <div class="flex-grow flex flex-col items-center justify-center"><canvas id="chess-canvas"></canvas></div>
                         </div>
 
-                        <div id="state-chat" class="app-state hidden flex-col">
-                            <div id="chat-header" class="app-title uppercase">Messages</div>
-                            <div id="chat-display" class="flex-grow overflow-y-auto pr-1"></div>
+                        <div id="state-chat" class="app-state hidden flex-col h-full">
+                            <div id="chat-header" class="app-title uppercase text-center">Messages</div>
+                            <div id="chat-display" class="flex-grow overflow-y-auto flex flex-col p-2"></div>
                         </div>
 
-                        <div id="state-wipe" class="app-state hidden flex flex-col justify-center items-center text-center">
-                            <div class="text-4xl mb-4">⚠️</div>
-                            <div class="app-title w-full text-center">PRIVACY PROTOCOL</div>
-                            <p class="font-bold text-sm mb-2">UNVERIFIED CONTACT DETECTED</p>
-                            <div class="w-full bg-[#0f380f]/20 h-4 border border-[#0f380f] mb-2">
-                                <div class="bg-[#0f380f] h-full animate-[width_2s_ease-out_forwards]" style="width: 100%"></div>
+                        <div id="state-wipe" class="app-state hidden flex flex-col justify-center items-center text-center h-full bg-red-900/20 rounded-lg">
+                            <div class="text-5xl mb-4">⚠️</div>
+                            <h2 class="text-xl font-bold text-red-400 mb-2">PRIVACY PROTOCOL</h2>
+                            <p class="text-sm text-zinc-300 mb-4">UNVERIFIED CONTACT DETECTED</p>
+                            <div class="w-48 bg-gray-800 h-2 rounded-full overflow-hidden mb-2">
+                                <div class="bg-red-500 h-full animate-[width_2s_ease-out_forwards]" style="width: 100%"></div>
                             </div>
-                            <p class="font-black animate-pulse">WIPING KEYS...</p>
+                            <p class="font-mono text-red-500 animate-pulse text-xs">WIPING KEYS...</p>
                         </div>
                     </div>
 
-                    <div id="lcd-footer" class="mt-2 md:mt-4 flex justify-between font-black text-[9px] md:text-[11px] opacity-0">
-                        <span>PRIVATE MESH</span><span class="animate-pulse">ENCRYPTED</span>
+                    <div id="lcd-footer" class="mt-2 flex justify-center opacity-0 text-[10px] text-zinc-500">
+                        <span>●</span>
                     </div>
                 </div>
             </div>
 
             <div class="hidden md:flex flex-col justify-center gap-10 px-2">
-                <div class="w-14 h-14 bg-zinc-900 rounded-2xl border-4 border-black flex items-center justify-center font-black text-zinc-600">A</div>
-                <div class="w-14 h-14 bg-zinc-900 rounded-2xl border-4 border-black flex items-center justify-center font-black text-zinc-500">B</div>
+                <button id="btn-a" class="w-14 h-14 bg-zinc-800 rounded-full border-4 border-black flex items-center justify-center font-black text-white shadow-[0_4px_0_0_#000] active:shadow-none active:translate-y-1 transition-all text-xl cursor-pointer hover:bg-zinc-700">A</button>
+                <button class="w-14 h-14 bg-zinc-800 rounded-full border-4 border-black flex items-center justify-center font-black text-white shadow-[0_4px_0_0_#000] active:shadow-none active:translate-y-1 transition-all text-xl cursor-pointer hover:bg-zinc-700">B</button>
             </div>
         </div>
 
-        <div class="bg-black/60 p-4 md:p-8 rounded-[2rem] md:rounded-[4rem] border border-white/5">
+        <div class="bg-black/60 p-4 md:p-8 rounded-[2rem] md:rounded-[4rem] border border-white/5 relative z-10">
             <div class="grid grid-cols-10 gap-1 md:gap-2 mb-2 md:mb-4" id="kb-row-1"></div>
             <div class="grid grid-cols-9 gap-1 md:gap-2 mb-2 md:mb-4 px-4 md:px-12" id="kb-row-2"></div>
             <div class="grid grid-cols-12 gap-1 md:gap-2">
                 <div class="key col-span-2 text-[8px] md:text-xs bg-zinc-900">DEL</div>
                 <div class="key col-span-7 tracking-[0.5em] md:tracking-[1em] text-[8px] md:text-xs">SPACE</div>
-                <div class="key col-span-3 text-[8px] md:text-xs bg-emerald-900/30 text-emerald-400 border-emerald-950">SEND</div>
+                <div class="key col-span-3 text-[8px] md:text-xs bg-blue-600 text-white border-blue-800">SEND</div>
             </div>
         </div>
     </div>
 
-    <section id="features-section" class="max-w-6xl mx-auto px-4 md:px-6 mb-32">
+    <section id="features-section" class="max-w-6xl mx-auto px-4 md:px-6 mb-32 relative z-10">
         <div class="text-center mb-16 md:mb-24">
             <h2 class="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-6">How The PoPP Protocol Works</h2>
             <p class="text-zinc-400 text-lg max-w-2xl mx-auto">Most phones connect kids to the world. We connect them to their friends. Our <span class="text-white font-bold">Proof of Physical Presence</span> system ensures digital safety mirrors real-world trust.</p>
@@ -207,83 +271,94 @@
             <div class="glass-card">
                 <div class="text-4xl md:text-6xl mb-6">🤜🤛</div>
                 <h3 class="text-xl md:text-2xl font-bold mb-3 uppercase text-emerald-400">1. The Handshake</h3>
-                <p class="text-zinc-400 leading-relaxed">Safety starts in person. To add a friend, kids must physically tap their devices together. <strong class="text-white">No tap = No connection.</strong> It is impossible for strangers to join the network remotely.</p>
+                <p class="text-zinc-400 leading-relaxed">Safety starts in person. To add a friend, kids must physically tap their devices together. <strong class="text-white">No tap = No connection.</strong></p>
             </div>
-            
             <div class="glass-card border-emerald-500/20 bg-emerald-500/5">
                 <div class="text-4xl md:text-6xl mb-6">📡</div>
                 <h3 class="text-xl md:text-2xl font-bold mb-3 uppercase text-emerald-400">2. Neighborhood Mesh</h3>
-                <p class="text-zinc-400 leading-relaxed">Once paired, our LoRa radio technology connects them from home to home—up to <strong class="text-white">3 miles</strong> away. They can chat and play games totally off-grid, without Wi-Fi or cellular plans.</p>
+                <p class="text-zinc-400 leading-relaxed">Once paired, our LoRa radio technology connects them from home to home—up to <strong class="text-white">3 miles</strong> away. Chat and play, fully off-grid.</p>
             </div>
-
             <div class="glass-card">
                 <div class="text-4xl md:text-6xl mb-6">⏳</div>
                 <h3 class="text-xl md:text-2xl font-bold mb-3 uppercase text-emerald-400">3. The Safe Wipe</h3>
-                <p class="text-zinc-400 leading-relaxed">Real friendships are active. If kids don't meet up within <strong class="text-white">7 days</strong>, the secure link automatically wipes itself. This prevents "ghost" contacts and data hoarding.</p>
+                <p class="text-zinc-400 leading-relaxed">If kids don't meet up within <strong class="text-white">7 days</strong>, the secure link automatically wipes itself. No "ghost" contacts or old data.</p>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-32">
-            <div>
-                <h2 class="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-6">Real Range.<br>Zero Internet.</h2>
-                <div class="space-y-6">
-                    <div class="border-l-4 border-emerald-500 pl-6">
-                        <h4 class="text-xl font-bold text-white mb-1">🏠 Home-to-Home</h4>
-                        <p class="text-zinc-400">Penetrates brick & concrete to keep kids connected from their bedrooms.</p>
-                    </div>
-                    <div class="border-l-4 border-zinc-700 pl-6">
-                        <h4 class="text-xl font-bold text-white mb-1">🌳 Neighborhood Park</h4>
-                        <p class="text-zinc-400">Up to 3 miles of coverage in residential areas.</p>
-                    </div>
-                    <div class="border-l-4 border-zinc-700 pl-6">
-                        <h4 class="text-xl font-bold text-white mb-1">🔋 2-Week Battery</h4>
-                        <p class="text-zinc-400">Always on, always ready. No daily charging required.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-zinc-900 rounded-3xl p-8 border border-white/10 aspect-square flex items-center justify-center relative overflow-hidden">
-                <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#444 1px, transparent 1px); background-size: 20px 20px;"></div>
-                <div class="w-64 h-64 border-4 border-emerald-500/30 rounded-full flex items-center justify-center relative animate-pulse">
-                    <div class="w-32 h-32 bg-emerald-500/20 rounded-full flex items-center justify-center">
-                        <div class="w-4 h-4 bg-emerald-500 rounded-full shadow-[0_0_20px_#10b981]"></div>
-                    </div>
-                    <div class="absolute -top-8 bg-black border border-emerald-500/50 px-3 py-1 rounded text-xs font-mono text-emerald-400">3 MILE RADIUS</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-zinc-900/50 rounded-[2rem] p-6 md:p-12 border border-white/5">
+        <div class="bg-zinc-900/50 rounded-[2rem] p-6 md:p-12 border border-white/5 mb-20 backdrop-blur-md">
             <h2 class="text-2xl md:text-4xl font-black uppercase text-center mb-10">Why Parents Choose MeshKid</h2>
-            
             <div class="hidden md:grid grid-cols-3 gap-4 mb-4 border-b border-white/10 pb-4">
                 <div class="text-zinc-500 font-bold uppercase tracking-widest text-sm">Feature</div>
-                <div class="text-center text-zinc-500 font-bold uppercase tracking-widest text-sm">Smartphones / "Kid Phones"</div>
-                <div class="text-center text-emerald-400 font-bold uppercase tracking-widest text-sm">MeshKid Device</div>
+                <div class="text-center text-zinc-500 font-bold uppercase tracking-widest text-sm">Smartphones</div>
+                <div class="text-center text-emerald-400 font-bold uppercase tracking-widest text-sm">MeshKid</div>
             </div>
-
             <div class="compare-row">
                 <div class="font-bold">Stranger Contact</div>
-                <div class="text-center text-zinc-400 text-sm">Possible via phone number spam</div>
-                <div class="text-center check-green text-lg">IMPOSSIBLE (Hardware Blocked)</div>
+                <div class="text-center text-zinc-400 text-sm">Possible</div>
+                <div class="text-center check-green text-lg">BLOCKED</div>
             </div>
             <div class="compare-row">
                 <div class="font-bold">Data Privacy</div>
-                <div class="text-center text-zinc-400 text-sm">Stored on Cloud Servers</div>
-                <div class="text-center check-green text-lg">100% Local Device Storage</div>
-            </div>
-            <div class="compare-row">
-                <div class="font-bold">Monthly Cost</div>
-                <div class="text-center text-zinc-400 text-sm">$15 - $60 / Month</div>
-                <div class="text-center check-green text-lg">$0 (Free Forever)</div>
+                <div class="text-center text-zinc-400 text-sm">Cloud</div>
+                <div class="text-center check-green text-lg">LOCAL</div>
             </div>
             <div class="compare-row border-none">
-                <div class="font-bold">Web Browsing</div>
-                <div class="text-center text-zinc-400 text-sm">Often accessible / Filtered</div>
-                <div class="text-center check-green text-lg">No Browser. No Ads.</div>
+                <div class="font-bold">Monthly Cost</div>
+                <div class="text-center text-zinc-400 text-sm">$40+</div>
+                <div class="text-center check-green text-lg">$0</div>
             </div>
         </div>
 
-        <div class="mt-20 text-center">
+        <div class="mb-32 border-t border-white/10 pt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-black uppercase mb-6">Extra Feature: Bluetooth Sharing</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-gradient-to-br from-zinc-900 to-black rounded-3xl p-8 border border-white/10 relative overflow-hidden backdrop-blur-md">
+                    <div class="relative z-10">
+                        <div class="text-4xl mb-4">⚡</div>
+                        <h3 class="text-2xl font-bold text-white mb-4">Share Face-to-Face</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed mb-6">
+                            Kids can beam photos, music, and files to friends instantly using Bluetooth. No internet required.
+                        </p>
+                        <div class="flex items-center gap-3 text-xs font-mono text-zinc-500 bg-black/50 p-3 rounded-lg border border-white/5">
+                            <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                            WORKS ONLY IN SAME ROOM
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-zinc-900 to-black rounded-3xl p-8 border border-white/10 backdrop-blur-md">
+                    <div class="relative z-10">
+                        <div class="text-4xl mb-4">🛡️</div>
+                        <h3 class="text-2xl font-bold text-white mb-4">Why It's Safe</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed mb-6">
+                            Sharing requires physical proximity. Strangers cannot send files from far away. It only works with friends who are standing right there.
+                        </p>
+                        <ul class="space-y-2 text-sm text-zinc-300">
+                            <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> No Cloud Uploads</li>
+                            <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> No Remote Access</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-5xl mx-auto border-t border-white/10 mt-32 pt-24 pb-24 text-center px-6">
+            <div class="inline-block p-4 rounded-full bg-zinc-900 border border-white/10 mb-8">
+                <span class="text-4xl">🚀</span>
+            </div>
+            <h2 class="text-3xl md:text-6xl font-black text-white leading-tight mb-8">
+                "Give kids the power.<br>They are the future."
+            </h2>
+            <p class="text-xl md:text-2xl text-zinc-400 font-medium max-w-3xl mx-auto leading-relaxed">
+                But we have to protect them while they get there.<br>
+                <span class="text-emerald-400 font-bold">MeshKid is that shield.</span>
+            </p>
+        </div>
+
+        <div class="mt-10 text-center">
             <button class="bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xl md:text-2xl py-6 px-12 rounded-full transition-all hover:scale-105 shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)]">
                 PRE-ORDER DUO PACK ($299)
             </button>
@@ -291,9 +366,72 @@
         </div>
     </section>
 
-    <footer class="py-20 md:py-32 text-center opacity-30 border-t border-white/5">
+    <footer class="py-20 md:py-32 text-center opacity-30 border-t border-white/5 relative z-10">
         <div class="mono text-[10px] md:text-[12px] tracking-[0.5em] md:tracking-[1em] mb-4 uppercase">PoPP Mesh Protocol 2026 | Verified Physical Presence</div>
     </footer>
+
+    <script>
+        const canvas = document.getElementById('mesh-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2 + 1;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255,255,255,0.2)';
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 60; i++) particles.push(new Particle());
+
+        function animateBg() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach((p, index) => {
+                p.update();
+                p.draw();
+                // Draw connections
+                for (let j = index + 1; j < particles.length; j++) {
+                    const p2 = particles[j];
+                    const dx = p.x - p2.x;
+                    const dy = p.y - p2.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 150) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(255,255,255,${0.15 - dist/1000})`;
+                        ctx.lineWidth = 1;
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                    }
+                }
+            });
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+    </script>
 
     <script>
         const device = document.getElementById('mesh-device');
@@ -312,34 +450,37 @@
         const scenario = [
             { type: 'boot', finish: finishes.black, label: 'POWERING_ON', duration: 4000 },
             { type: 'home', select: 'mi-mesh', finish: finishes.orange, label: 'SAFE_ZONE', duration: 2500 },
-            { type: 'chat', header: 'Nearby Friends', finish: finishes.green, label: 'Local Mesh', duration: 8000, msgs: ["SkateRat: Park at 4?", "PixelKid: Let's go!"] },
+            { type: 'chat', header: 'Nearby Friends', finish: finishes.green, label: 'Local Mesh', duration: 8000, msgs: [{text: "Park at 4?", me: false}, {text: "Let's go!", me: true}] },
             { type: 'home', select: 'mi-bonds', finish: finishes.cream, label: 'FAMILY_LINK', duration: 2000 },
-            { type: 'chat', header: 'Mom Bond', finish: finishes.cream, label: 'Family Chat', duration: 6000, msgs: ["Mom: Dinner's ready!", "ME: Omw home!"] },
-            { type: 'home', select: 'mi-snake', finish: finishes.black, label: 'FUN_ZONE', duration: 2000 },
-            { type: 'snake', finish: finishes.black, label: 'Snake Game', duration: 7000 },
+            { type: 'chat', header: 'Mom Bond', finish: finishes.cream, label: 'Family Chat', duration: 6000, msgs: [{text: "Dinner's ready!", me: false}, {text: "Omw home!", me: true}] },
+            { type: 'home', select: 'mi-mario', finish: finishes.black, label: 'FUN_ZONE', duration: 2000 },
+            { type: 'mario', finish: finishes.black, label: 'Super Mario', duration: 8000 },
             { type: 'wipe', finish: finishes.black, label: 'AUTO_WIPE', duration: 4000 }
         ];
 
         let step = 0;
         let typingTimer;
 
-        async function typeWriter(fullMsg, element) {
+        async function typeWriter(msgObj, container) {
             return new Promise(resolve => {
-                const parts = fullMsg.split(': ');
-                const sender = parts[0] + ': ';
-                const message = parts[1];
-                
-                element.innerHTML = `<strong>${sender}</strong><span class="msg-content cursor-active"></span>`;
-                const contentSpan = element.querySelector('.msg-content');
-                
+                const bubble = document.createElement('div');
+                bubble.className = msgObj.me ? "chat-bubble-right" : "chat-bubble-left";
+                container.appendChild(bubble);
+                const name = document.createElement('div');
+                name.className = "text-[9px] font-bold opacity-50 mb-1";
+                name.innerText = msgObj.me ? "ME" : "CONTACT";
+                bubble.appendChild(name);
+                const span = document.createElement('span');
+                span.className = "cursor-active";
+                bubble.appendChild(span);
                 let i = 0;
                 function type() {
-                    if (i < message.length) {
-                        contentSpan.innerHTML += message.charAt(i);
+                    if (i < msgObj.text.length) {
+                        span.innerText += msgObj.text.charAt(i);
                         i++;
-                        typingTimer = setTimeout(type, 50);
+                        typingTimer = setTimeout(type, 40);
                     } else {
-                        contentSpan.classList.remove('cursor-active');
+                        span.classList.remove('cursor-active');
                         resolve();
                     }
                 }
@@ -352,8 +493,7 @@
             const current = scenario[step];
             document.querySelectorAll('.app-state').forEach(s => s.classList.add('hidden'));
             device.style.background = current.finish;
-            document.getElementById('lcd-label').innerText = current.label;
-
+            
             if (current.type === 'boot') {
                 lcd.classList.remove('lcd-on');
                 hud.style.opacity = "0";
@@ -367,13 +507,13 @@
                 lcd.classList.add('lcd-on');
                 hud.style.opacity = "1";
                 footer.style.opacity = "1";
-                
                 if (current.type === 'home') {
                     document.getElementById('state-home').classList.remove('hidden');
                     document.querySelectorAll('.menu-btn').forEach(m => m.classList.remove('menu-active'));
                     document.getElementById(current.select).classList.add('menu-active');
-                } else if (current.type === 'snake') {
-                    document.getElementById('state-snake').classList.remove('hidden');
+                } else if (current.type === 'mario') {
+                    document.getElementById('state-mario').classList.remove('hidden');
+                    runMario();
                 } else if (current.type === 'chess') {
                     document.getElementById('state-chess').classList.remove('hidden');
                     runChess();
@@ -384,10 +524,8 @@
                     const d = document.getElementById('chat-display'); 
                     d.innerHTML = "";
                     for (const msg of current.msgs) {
-                        const div = document.createElement('div');
-                        div.className = "chat-text";
-                        d.appendChild(div);
-                        await typeWriter(msg, div);
+                        await typeWriter(msg, d);
+                        d.scrollTop = d.scrollHeight;
                         await new Promise(r => setTimeout(r, 600));
                     }
                 } else if (current.type === 'wipe') {
@@ -400,42 +538,129 @@
             }, current.duration);
         }
 
-        const sCanvas = document.getElementById('game-canvas'), sCtx = sCanvas.getContext('2d');
-        const canvasSize = 200; 
-        sCanvas.width = canvasSize; sCanvas.height = canvasSize;
-        let grid = 10, sCount = 0, score = 0, snake = { x: 100, y: 100, dx: grid, dy: 0, cells: [], maxCells: 4 }, apple = { x: 40, y: 40 };
-        function snakeLoop() {
-            requestAnimationFrame(snakeLoop); if (++sCount < 5) return; sCount = 0;
-            sCtx.clearRect(0,0,canvasSize,canvasSize);
-            if (snake.x < apple.x && snake.dx === 0) { snake.dx = grid; snake.dy = 0; } else if (snake.x > apple.x && snake.dx === 0) { snake.dx = -grid; snake.dy = 0; }
-            else if (snake.y < apple.y && snake.dy === 0) { snake.dy = grid; snake.dx = 0; } else if (snake.y > apple.y && snake.dy === 0) { snake.dy = -grid; snake.dx = 0; }
-            snake.x += snake.dx; snake.y += snake.dy;
-            snake.cells.unshift({x: snake.x, y: snake.y}); if (snake.cells.length > snake.maxCells) snake.cells.pop();
-            sCtx.fillStyle = '#0f380f'; sCtx.fillRect(apple.x, apple.y, grid-1, grid-1);
-            snake.cells.forEach(c => { sCtx.fillRect(c.x, c.y, grid-1, grid-1); if (c.x === apple.x && c.y === apple.y) { snake.maxCells++; score += 10; document.getElementById('score').innerText = score.toString().padStart(3, '0'); apple.x = Math.floor(Math.random() * 18) * grid; apple.y = Math.floor(Math.random() * 18) * grid; } });
+        /* --- ADVANCED MARIO GAME ENGINE --- */
+        const mCanvas = document.getElementById('mario-canvas'), mCtx = mCanvas.getContext('2d');
+        let marioRunning = false;
+        let userInput = false; 
+
+        // Button A triggers jump
+        document.getElementById('btn-a').addEventListener('click', () => { userInput = true; });
+        document.addEventListener('keydown', (e) => { if(e.code === 'Space') userInput = true; });
+
+        function runMario() {
+            if(marioRunning) return;
+            marioRunning = true;
+            mCanvas.width = 400; mCanvas.height = 300; 
+
+            // Game State
+            let camX = 0;
+            let player = { x: 50, y: 200, vy: 0, grounded: false, state: 'run' };
+            let score = 0;
+
+            // Assets (Procedural Pixel Art)
+            const drawSprite = (ctx, x, y, type, frame) => {
+                ctx.save();
+                if(type === 'mario') {
+                    ctx.fillStyle = '#f00'; ctx.fillRect(x, y, 16, 16); // Hat/Shirt
+                    ctx.fillStyle = '#ec9'; ctx.fillRect(x+4, y+4, 10, 8); // Face
+                    ctx.fillStyle = '#00f'; ctx.fillRect(x+2, y+16, 12, 14); // Overalls
+                    if(frame % 10 > 5 && player.grounded) { ctx.fillStyle = '#000'; ctx.fillRect(x, y+28, 6, 4); } // Feet anim
+                } else if (type === 'goomba') {
+                    ctx.fillStyle = '#831'; ctx.beginPath(); ctx.arc(x+8, y+8, 8, 0, Math.PI*2); ctx.fill(); // Body
+                    ctx.fillStyle = '#000'; ctx.fillRect(x+2, y+14, 4, 4); ctx.fillRect(x+10, y+14, 4, 4); // Feet
+                    if(frame % 20 > 10) { ctx.clearRect(x+2, y+14, 4, 4); } // Walk anim
+                } else if (type === 'brick') {
+                    ctx.fillStyle = '#b63'; ctx.fillRect(x, y, 32, 32);
+                    ctx.strokeStyle = '#000'; ctx.strokeRect(x,y,32,32);
+                    ctx.fillStyle = '#fa5'; ctx.fillRect(x+2, y+2, 28, 2);
+                } else if (type === 'qblock') {
+                    ctx.fillStyle = '#ea0'; ctx.fillRect(x, y, 32, 32);
+                    ctx.fillStyle = '#000'; ctx.font = "bold 20px monospace"; ctx.fillText("?", x+10, y+24);
+                    ctx.strokeStyle = '#000'; ctx.strokeRect(x,y,32,32);
+                }
+                ctx.restore();
+            };
+
+            // Level Data
+            const entities = [
+                {x: 300, y: 234, type: 'goomba', alive: true},
+                {x: 600, y: 234, type: 'goomba', alive: true},
+                {x: 200, y: 150, type: 'qblock', hit: false},
+                {x: 232, y: 150, type: 'brick'},
+                {x: 264, y: 150, type: 'brick'},
+                {x: 700, y: 200, type: 'brick'}, // Pipe sub
+            ];
+
+            function loop() {
+                if(document.getElementById('state-mario').classList.contains('hidden')) {
+                    marioRunning = false; return;
+                }
+                
+                // Update
+                camX += 2; // Auto-scroll
+                player.vy += 0.8; // Gravity
+                player.y += player.vy;
+                
+                // Ground Collision
+                if(player.y > 234) { player.y = 234; player.vy = 0; player.grounded = true; }
+                else player.grounded = false;
+
+                // AI / Input Logic
+                // Jump if goomba nearby or gap
+                let jumpTrigger = false;
+                entities.forEach(e => {
+                    if(e.type === 'goomba' && e.alive && e.x - (player.x + camX) < 80 && e.x - (player.x + camX) > 0) jumpTrigger = true;
+                    if(e.type === 'qblock' && !e.hit && Math.abs(e.x - (player.x + camX)) < 20) jumpTrigger = true;
+                });
+                
+                if((jumpTrigger || userInput) && player.grounded) {
+                    player.vy = -12;
+                    userInput = false;
+                }
+
+                // Render
+                mCtx.fillStyle = '#5c94fc'; mCtx.fillRect(0,0, 400, 300); // Sky
+                
+                // Ground
+                mCtx.fillStyle = '#c84c0c'; mCtx.fillRect(0, 250, 400, 50);
+                mCtx.fillStyle = '#5c0'; mCtx.fillRect(0, 250, 400, 5); // Grass
+
+                mCtx.save();
+                mCtx.translate(-camX % 400, 0); // Endless scrolling effect illusion
+                // Draw Level (Static relative to scroll for this demo loop)
+                entities.forEach(e => {
+                    let renderX = e.x - camX + 50; // Parallax hack for loop
+                    if(renderX < -50) e.x += 800; // Recycle entities
+                    drawSprite(mCtx, e.x - camX, e.y, e.type, camX);
+                });
+                mCtx.restore();
+
+                // Draw Player
+                drawSprite(mCtx, player.x, player.y, 'mario', camX);
+
+                requestAnimationFrame(loop);
+            }
+            loop();
         }
 
+        /* --- CHESS RENDER --- */
         const cCanvas = document.getElementById('chess-canvas'), cCtx = cCanvas.getContext('2d');
         const chessSize = 180;
         cCanvas.width = chessSize; cCanvas.height = chessSize;
         function runChess() {
             cCtx.clearRect(0,0,chessSize,chessSize);
             const tileSize = chessSize / 8;
-            for(let i=0; i<8; i++) for(let j=0; j<8; j++) { cCtx.fillStyle = (i+j)%2===0 ? '#8bac0f' : '#0f380f'; cCtx.fillRect(i*tileSize, j*tileSize, tileSize, tileSize); }
+            for(let i=0; i<8; i++) for(let j=0; j<8; j++) { cCtx.fillStyle = (i+j)%2===0 ? '#f0d9b5' : '#b58863'; cCtx.fillRect(i*tileSize, j*tileSize, tileSize, tileSize); }
         }
 
         const r1 = "QWERTYUIOP".split(""), r2 = "ASDFGHJKL".split("");
         const pop = (chars, id) => {
             const container = document.getElementById(id);
-            chars.forEach(c => {
-                const b = document.createElement('div'); b.className = "key"; b.innerText = c;
-                container.appendChild(b);
-            });
+            chars.forEach(c => { const b = document.createElement('div'); b.className = "key"; b.innerText = c; container.appendChild(b); });
         };
         pop(r1, 'kb-row-1'); pop(r2, 'kb-row-2');
 
         playScenario(); 
-        snakeLoop();
     </script>
 </body>
 </html>
